@@ -5,11 +5,11 @@ Predicts the emote distribution of Twitch chat reactions from raw video and audi
 <table>
   <tr>
     <td><img src="assets/twitch_emote_prediction_demo.gif" width="420"/></td>
-    <td valign="top">
+    <td align="center" valign="top">
       <p><strong>Actual chat</strong></p>
-      <img src="assets/twitch_emote_actual_distribution.png" width="280"/>
+      <img src="assets/twitch_emote_actual_distribution.png" width="320"/>
       <p><strong>Model prediction</strong></p>
-      <img src="assets/twitch_emote_model_distribution.png" width="280"/>
+      <img src="assets/twitch_emote_model_distribution.png" width="320"/>
     </td>
   </tr>
 </table>
