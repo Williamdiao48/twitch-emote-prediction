@@ -1,6 +1,6 @@
 # Twitch Emote Prediction
 
-Given a 15-second Twitch clip, predicts a probability distribution over the top-50 most frequent chat emotes using joint audio-visual embeddings from pretrained foundation models. Built as part of ACM AI at UCLA.
+Given a 15-second Twitch clip, the model predicts a probability distribution over the top-50 most frequent chat emotes using joint audio-visual embeddings from pretrained foundation models. Built as part of ACM AI at UCLA.
 
 **Demo**
 
