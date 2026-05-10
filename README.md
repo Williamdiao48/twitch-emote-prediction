@@ -2,10 +2,13 @@
 
 Predicts the emote distribution of Twitch chat reactions from raw video and audio, using joint audio-visual embeddings from pretrained foundation models. Built as part of ACM AI at UCLA.
 
-<table>
+<table border="0" cellspacing="0" cellpadding="12">
   <tr>
-    <td><img src="assets/twitch_emote_prediction_demo.gif" width="420"/></td>
-    <td align="center" valign="top">
+    <td>
+      <p><strong>Demo</strong></p>
+      <img src="assets/twitch_emote_prediction_demo.gif" width="420"/>
+    </td>
+    <td align="center" valign="middle">
       <p><strong>Actual chat</strong></p>
       <img src="assets/twitch_emote_actual_distribution.png" width="320"/>
       <p><strong>Model prediction</strong></p>
