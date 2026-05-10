@@ -1,0 +1,14 @@
+# pip install required in Colab
+yt-dlp
+curl-cffi
+
+# pre-installed in Colab
+torch
+transformers
+accelerate
+librosa
+opencv-python
+numpy
+tqdm
+seaborn
+matplotlib
