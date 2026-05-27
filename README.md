@@ -41,9 +41,9 @@ The project is structured as three sequential Google Colab notebooks:
   - A normalized emote-frequency target vector (JSON)
 
 ### 2. `embedding_extraction.ipynb` — Feature Extraction
-- Extracts a 1024-dim video embedding per clip using **V-JEPA 2** (`facebook/vjepa2-vitl-fpc64-256`), a self-supervised video understanding model from Meta
-- Extracts a 768-dim audio embedding per clip using the encoder of **Whisper** (`openai/whisper-small`)
-- Concatenates the two into a 1792-dim joint embedding and saves it as a `.npy` file
+- Extracts a video token sequence `[32, 1024]` per clip using **V-JEPA 2** (`facebook/vjepa2-vitl-fpc64-256`), a self-supervised video understanding model from Meta — 32 temporally-ordered vectors produced by spatially mean-pooling V-JEPA's patch tokens per temporal step
+- Extracts an audio token sequence `[125, 768]` per clip using the encoder of **Whisper** (`openai/whisper-small`) — stride-6 downsampled from the encoder's 750 active frames
+- Saves both sequences together as a `.npz` file
 
 ### 3. `train.ipynb` — Model Training & Evaluation
 - Loads joint embeddings and emote targets across all processed VODs
@@ -70,7 +70,7 @@ Audio  (768-dim) ─► Audio Tower  ──┘               │
                                           Log-Softmax (50-dim)
 ```
 
-**Visual Tower** and **Audio Tower** each independently compress their input modality through a 3-stage bottleneck (LayerNorm → Linear → GELU, repeated) down to 64-dim, with dropout for regularization.
+**Visual Tower** and **Audio Tower** each independently compress their input modality through a 3-stage bottleneck (LayerNorm → Linear → GELU, repeated) down to 128-dim, with dropout for regularization.
 
 **CrossAttentionBottleneck** performs bidirectional cross-modal attention: the visual representation queries audio ("what audio events are consistent with this scene?") and the audio representation queries video ("what visual events match this audio spike?"). Residual connections and LayerNorm are applied after each attention operation.
 
@@ -88,7 +88,7 @@ Two **ResidualBlock** layers (LayerNorm → Linear → GELU → Dropout → Line
 | Optimizer | AdamW, lr=3e-4, weight_decay=0.1 |
 | LR Schedule | Linear warmup (5 epochs) → cosine annealing |
 | Mixup | α=0.5 (epochs 0–19) → 0.2 (20–34) → 0.0 (35+) |
-| Early stopping | Patience = 12 epochs |
+| Early stopping | Patience = 20 epochs |
 | Label smoothing | 0.025 (per-channel, applied to valid emotes only) |
 | Feature noise | Gaussian noise σ=0.02 injected during training |
 
@@ -115,9 +115,9 @@ Evaluated on 852 held-out test clips:
 
 | Metric | Value |
 |---|---|
-| Average KL loss | 1.2567 |
-| Top-1 in top-5 accuracy | 67.7% |
-| Top-5 overlap (avg) | 2.31 / 5 (46.2%) |
+| Average KL loss | 1.3022 |
+| Top-1 in top-5 accuracy | 64.2% |
+| Top-5 overlap (avg) | 2.29 / 5 (45.8%) |
 
 **Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 67.7% of the time.
 
@@ -163,6 +163,6 @@ All other dependencies (`torch`, `transformers`, `accelerate`, `librosa`, `openc
 
 ## Limitations & Future Work
 
-**Richer cross-modal attention.** The current pipeline extracts globally-pooled embeddings from V-JEPA and Whisper before fusion, so the `CrossAttentionBottleneck` operates over single-vector representations of each modality. The natural next step is to bypass pooling and instead use the full token sequences produced by each backbone — `last_hidden_state` from Whisper's encoder gives temporal audio tokens, and V-JEPA's intermediate representations give spatially distinct video tokens. Cross-attention over these sequences would allow the model to attend to specific temporal or spatial regions of one modality conditioned on the other, rather than fusing globally-pooled summaries. This would require re-running embedding extraction and retraining, and is the primary architectural improvement planned.
+**Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. In practice, with ~4,000 training clips the attention weights tend to collapse toward uniform across tokens, making the mechanism roughly equivalent to mean pooling. The architecture is sound but data-limited: sequence-level cross-attention needs appreciably more examples to learn meaningful temporal correspondences. Expanding to more VODs (particularly from additional channels and game titles) is the primary path to improving the model.
 
 **Dataset scale and compute.** Training on 3 VODs from a single game limits generalization across streaming contexts. Expanding to more channels, games, and community styles would improve robustness and produce a more representative emote vocabulary — but scraping, embedding extraction, and retraining at that scale requires compute resources beyond what a free Colab runtime can sustain. This is the primary practical bottleneck to improving the model further.
