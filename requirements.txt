@@ -4,6 +4,7 @@ curl-cffi
 
 # pre-installed in Colab
 torch
+torchaudio
 transformers
 accelerate
 librosa
