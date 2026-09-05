@@ -119,9 +119,9 @@ Evaluated on 852 held-out test clips:
 | Top-1 in top-5 accuracy | 64.2% |
 | Top-5 overlap (avg) | 2.29 / 5 (45.8%) |
 
-**Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 67.7% of the time.
+**Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 64.2% of the time.
 
-**Top-5 overlap**: on average, 2.31 of the model's top-5 predicted emotes overlap with the actual top-5 emotes in chat — 46.2% overlap on a 5-class ranking task with a vocabulary of 50.
+**Top-5 overlap**: on average, 2.29 of the model's top-5 predicted emotes overlap with the actual top-5 emotes in chat — 45.8% overlap on a 5-class ranking task with a vocabulary of 50.
 
 ![Top-5 Emote Overlap Distribution](assets/top5_emote_overlap_distribution.png)
 
