@@ -98,8 +98,8 @@ A **fusion projection** compresses the concatenated 320-dim vector (128 visual +
 
 ## Dataset
 
-- **Source**: 3 Twitch VODs from VCT (Valorant Champions Tour) broadcast streams on the official Riot Games Valorant channel
-- **Scale**: 4,000+ labelled clips
+- **Source**: 12 Twitch VODs across 4 Valorant channels (Riot Games Valorant, FNS, VCT Americas, VCT EMEA), scraped into 8,000+ labelled clips
+- **Trained on**: the 3 VCT (Valorant Champions Tour) VODs from the official Riot Games Valorant channel — 4,000+ clips. Mixing channels degraded accuracy, so the reported run is single-channel (see [Limitations](#limitations--future-work))
 - **Clip length**: 15 seconds, 64 frames at 256×256 (center-cropped)
 - **Target**: Normalized emote-frequency vector over a global vocabulary of 50 emotes
 - **Emote sources**: Twitch native + BTTV + FFZ + 7TV
@@ -163,6 +163,8 @@ All other dependencies (`torch`, `transformers`, `accelerate`, `librosa`, `openc
 
 ## Limitations & Future Work
 
-**Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. In practice, with ~4,000 training clips the attention weights tend to collapse toward uniform across tokens, making the mechanism roughly equivalent to mean pooling. The architecture is sound but data-limited: sequence-level cross-attention needs appreciably more examples to learn meaningful temporal correspondences. Expanding to more VODs (particularly from additional channels and game titles) is the primary path to improving the model.
+**Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. In practice, with ~4,000 training clips the attention weights tend to collapse toward uniform across tokens, making the mechanism roughly equivalent to mean pooling. The architecture is sound but data-limited: sequence-level cross-attention needs appreciably more examples to learn meaningful temporal correspondences. More training clips is the primary path to improving the model — though see below on *which* clips.
 
-**Dataset scale and compute.** Training on 3 VODs from a single game limits generalization across streaming contexts. Expanding to more channels, games, and community styles would improve robustness and produce a more representative emote vocabulary — but scraping, embedding extraction, and retraining at that scale requires compute resources beyond what a free Colab runtime can sustain. This is the primary practical bottleneck to improving the model further.
+**Cross-channel generalization.** The scraped corpus spans four channels; the reported model trains on one. Including the other channels' clips degraded accuracy enough that the corpus was restricted to the Riot Games Valorant channel. The per-channel embedding was designed for exactly this case — conditioning predictions on community-specific emote vocabularies — and at this scale it was not sufficient to absorb the shift between a tournament broadcast's chat and an individual streamer's. Whether that is a data-volume limit or an architectural one is untested: more clips *per channel*, rather than more channels, is the experiment to run.
+
+**Compute.** Scraping, embedding extraction, and retraining at appreciably larger scale requires resources beyond what a free Colab runtime can sustain. This is the primary practical bottleneck to expanding the dataset.
