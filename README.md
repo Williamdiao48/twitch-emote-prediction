@@ -76,7 +76,7 @@ Audio  (768-dim) ─► Audio Tower  ──┘               │
 
 The fused representation is concatenated with a learned **per-channel embedding** (64-dim) that encodes which Twitch channel the clip is from. Different Twitch communities develop distinct emote vocabularies and react to the same events differently — a clutch play on a VCT broadcast elicits different emotes than the same play on a smaller streamer's channel. The channel embedding gives the model a way to condition its predictions on those community-specific norms rather than averaging over them.
 
-Two **ResidualBlock** layers (LayerNorm → Linear → GELU → Dropout → Linear → Dropout, with skip connection) process the fused representation before the final head.
+A **fusion projection** compresses the concatenated 320-dim vector (128 visual + 128 audio + 64 channel) down to a 64-dim trunk. Two **ResidualBlock** layers (LayerNorm → Linear → GELU → Dropout → Linear → Dropout, with skip connection) then process it before the final head.
 
 **Per-class temperature scaling** (a learned scalar per output class) sharpens or softens predictions independently for each emote, allowing the model to express calibrated uncertainty.
 
