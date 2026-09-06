@@ -169,6 +169,16 @@ All other dependencies (`torch`, `transformers`, `accelerate`, `librosa`, `openc
 
 ---
 
+## Notes on Use
+
+This is a research and educational project.
+
+**Chat scraping.** The scraper reads chat history through Twitch's internal GQL endpoint — the one the web client uses, with a persisted query hash and browser-issued credentials — rather than the public Helix API, because Helix does not expose historical VOD chat. This is undocumented and unsupported, and may fall outside Twitch's developer terms. Check them before running it, and be considerate of rate limits if you do.
+
+**Data.** No scraped data is redistributed here. The repository contains code plus a single short demo clip; VOD footage, audio, chat logs, and the derived embeddings all stay local to whoever runs the notebooks. Broadcast footage remains the property of its rights holders — the demo clip is included for illustration only.
+
+---
+
 ## Limitations & Future Work
 
 **Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. In practice, with ~4,000 training clips the attention weights tend to collapse toward uniform across tokens, making the mechanism roughly equivalent to mean pooling. The architecture is sound but data-limited: sequence-level cross-attention needs appreciably more examples to learn meaningful temporal correspondences. More training clips is the primary path to improving the model — though see below on *which* clips.
