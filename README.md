@@ -56,9 +56,11 @@ The project is structured as three sequential Google Colab notebooks:
 ## Model Architecture
 
 ```
-Video (1024-dim) ─► Visual Tower ──┐
+Video [32, 1024] ─► Visual Tower ──┐
                                    ├──► CrossAttentionBottleneck
-Audio  (768-dim) ─► Audio Tower  ──┘               │
+Audio [125, 768] ─► Audio Tower  ──┘               │
+                                          Mean-pool over sequence
+                                                   │
                                          Concat + Channel Embed
                                                    │
                                            Fusion Projection
@@ -72,7 +74,7 @@ Audio  (768-dim) ─► Audio Tower  ──┘               │
 
 **Visual Tower** and **Audio Tower** each independently compress their input modality through a 3-stage bottleneck (LayerNorm → Linear → GELU, repeated) down to 128-dim, with dropout for regularization.
 
-**CrossAttentionBottleneck** performs bidirectional cross-modal attention: the visual representation queries audio ("what audio events are consistent with this scene?") and the audio representation queries video ("what visual events match this audio spike?"). Residual connections and LayerNorm are applied after each attention operation.
+**CrossAttentionBottleneck** performs bidirectional cross-modal attention: the visual representation queries audio ("what audio events are consistent with this scene?") and the audio representation queries video ("what visual events match this audio spike?"). Residual connections and LayerNorm are applied after each attention operation. The attended sequences are then mean-pooled over their sequence dimension, giving one vector per modality.
 
 The fused representation is concatenated with a learned **per-channel embedding** (64-dim) that encodes which Twitch channel the clip is from. Different Twitch communities develop distinct emote vocabularies and react to the same events differently — a clutch play on a VCT broadcast elicits different emotes than the same play on a smaller streamer's channel. The channel embedding gives the model a way to condition its predictions on those community-specific norms rather than averaging over them.
 
@@ -91,6 +93,10 @@ A **fusion projection** compresses the concatenated 320-dim vector (128 visual +
 | Early stopping | Patience = 20 epochs |
 | Label smoothing | 0.025 (per-channel, applied to valid emotes only) |
 | Feature noise | Gaussian noise σ=0.02 injected during training |
+| Dropout | 0.7 (fusion trunk), 0.2 (towers), 0.1 (input features) |
+| Batch size | 64 |
+| Max epochs | 100 (early-stopped in practice) |
+| Temperature | Frozen during warmup, learned from epoch 5 onward |
 
 ![Training History](assets/training_loss_visualization.png)
 
@@ -103,7 +109,7 @@ A **fusion projection** compresses the concatenated 320-dim vector (128 visual +
 - **Clip length**: 15 seconds, 64 frames at 256×256 (center-cropped)
 - **Target**: Normalized emote-frequency vector over a global vocabulary of 50 emotes
 - **Emote sources**: Twitch native + BTTV + FFZ + 7TV
-- **Train / test split**: 80 / 20
+- **Train / test split**: 80 / 20, seeded (`SPLIT_SEED = 42`) so the partition reproduces across sessions
 
 Clips are only included if their window contains at least 5 emote occurrences, filtering out low-signal segments. Targets are normalized to a probability distribution and label-smoothed to account for emotes that appear on a channel but not in a specific clip.
 
@@ -122,6 +128,8 @@ Evaluated on 852 held-out test clips:
 **Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 64.2% of the time.
 
 **Top-5 overlap**: on average, 2.29 of the model's top-5 predicted emotes overlap with the actual top-5 emotes in chat — 45.8% overlap on a 5-class ranking task with a vocabulary of 50.
+
+**Evaluation caveat.** The held-out set drives early stopping and checkpoint selection as well as final reporting, so it functions as a validation set and the figures above are mildly optimistic. The 80/20 split is also random over clips, and clips are consecutive 15-second windows from the same broadcasts — so a test clip's neighbours frequently appear in training. A grouped split (holding out whole VODs) would be the stricter evaluation, and would likely score lower.
 
 ![Top-5 Emote Overlap Distribution](assets/top5_emote_overlap_distribution.png)
 
