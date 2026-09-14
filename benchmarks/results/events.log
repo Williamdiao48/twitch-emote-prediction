@@ -1,0 +1,66 @@
+[2026-09-13 22:41:57] Logging to /content/drive/MyDrive/twitch_emote_benchmarks/old_vs_new_1594760722_20260913_224155
+[2026-09-13 22:41:57] 8 CPUs, 53.5 GB RAM | ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers | OpenCV 5.0.0
+[2026-09-13 22:41:57] ▶ pipeline_total
+[2026-09-13 22:41:57] ▶ vod_metadata
+[2026-09-13 22:41:58] ■ vod_metadata: 1.68s (ok)
+[2026-09-13 22:41:58] ▶ download_chat [new method]
+[2026-09-13 22:58:56] ■ download_chat [new method]: 16m 58.1s (ok)
+[2026-09-13 22:58:56] ▶ download_video [new method]
+[2026-09-13 23:02:49] ■ download_video [new method]: 3m 52.9s (ok)
+[2026-09-13 23:02:49] ▶ analyze_chat
+[2026-09-13 23:02:50]    ✅ Loaded 89 BTTV emote codes.
+[2026-09-13 23:02:50] ✅ Found 1225 clips where emote count >= 40.
+[2026-09-13 23:02:50] Total unique emotes identified: 3183
+[2026-09-13 23:02:50] ■ analyze_chat: 1.09s (ok)
+[2026-09-13 23:02:50] Processing 1225 of 1225 clips (CLIP_STRIDE=1) with both methods, spanning 0.61h to 6.63h of the VOD.
+[2026-09-13 23:02:50] ▶ process_clips [old + new, interleaved]
+[2026-09-13 23:04:07] clip 10/1225 | VOD pos 0.65h | old: audio 6.09s video 0.32s | new: audio 0.96s video 0.33s | so far old 1m 02.9s vs new 12.66s
+[2026-09-13 23:05:26] clip 20/1225 | VOD pos 0.69h | old: audio 6.58s video 0.28s | new: audio 0.97s video 0.35s | so far old 2m 09.3s vs new 25.81s
+[2026-09-13 23:06:47] clip 30/1225 | VOD pos 0.73h | old: audio 6.34s video 0.40s | new: audio 0.91s video 0.41s | so far old 3m 16.7s vs new 38.75s
+[2026-09-13 23:08:11] clip 40/1225 | VOD pos 0.78h | old: audio 7.26s video 0.31s | new: audio 0.97s video 0.32s | so far old 4m 28.4s vs new 51.30s
+[2026-09-13 23:09:39] clip 50/1225 | VOD pos 0.82h | old: audio 7.23s video 0.32s | new: audio 0.89s video 0.35s | so far old 5m 43.4s vs new 1m 04.0s
+[2026-09-13 23:11:10] clip 60/1225 | VOD pos 0.87h | old: audio 7.95s video 0.34s | new: audio 1.00s video 0.36s | so far old 7m 02.1s vs new 1m 16.8s
+[2026-09-13 23:12:44] clip 70/1225 | VOD pos 0.91h | old: audio 8.09s video 0.30s | new: audio 0.90s video 0.36s | so far old 8m 23.2s vs new 1m 29.7s
+[2026-09-13 23:14:21] clip 80/1225 | VOD pos 0.95h | old: audio 8.27s video 0.38s | new: audio 1.02s video 0.33s | so far old 9m 47.3s vs new 1m 42.5s
+[2026-09-13 23:16:03] clip 90/1225 | VOD pos 0.99h | old: audio 9.20s video 0.31s | new: audio 0.89s video 0.33s | so far old 11m 15.5s vs new 1m 55.6s
+[2026-09-13 23:17:48] clip 100/1225 | VOD pos 1.03h | old: audio 8.74s video 0.33s | new: audio 0.91s video 0.32s | so far old 12m 48.7s vs new 2m 08.2s
+[2026-09-13 23:19:36] clip 110/1225 | VOD pos 1.07h | old: audio 9.46s video 0.28s | new: audio 0.93s video 0.31s | so far old 14m 23.7s vs new 2m 21.1s
+[2026-09-13 23:21:28] clip 120/1225 | VOD pos 1.12h | old: audio 9.80s video 0.36s | new: audio 0.92s video 0.36s | so far old 16m 02.5s vs new 2m 33.9s
+[2026-09-13 23:23:23] clip 130/1225 | VOD pos 1.16h | old: audio 10.17s video 0.34s | new: audio 0.95s video 0.36s | so far old 17m 44.0s vs new 2m 47.0s
+[2026-09-13 23:25:17] clip 140/1225 | VOD pos 1.20h | old: audio 9.93s video 0.32s | new: audio 0.86s video 0.36s | so far old 19m 25.9s vs new 2m 59.5s
+[2026-09-13 23:27:18] clip 150/1225 | VOD pos 1.24h | old: audio 10.49s video 0.31s | new: audio 0.96s video 0.41s | so far old 21m 13.8s vs new 3m 12.5s
+[2026-09-13 23:29:22] clip 160/1225 | VOD pos 1.28h | old: audio 11.08s video 0.33s | new: audio 1.02s video 0.31s | so far old 23m 04.8s vs new 3m 25.7s
+[2026-09-13 23:31:34] clip 170/1225 | VOD pos 1.32h | old: audio 11.21s video 0.42s | new: audio 1.04s video 0.41s | so far old 25m 02.5s vs new 3m 39.3s
+[2026-09-13 23:33:46] clip 180/1225 | VOD pos 1.37h | old: audio 11.76s video 0.32s | new: audio 0.97s video 0.34s | so far old 27m 01.1s vs new 3m 52.9s
+[2026-09-13 23:36:05] clip 190/1225 | VOD pos 1.41h | old: audio 11.92s video 0.37s | new: audio 1.05s video 0.32s | so far old 29m 06.9s vs new 4m 06.4s
+[2026-09-13 23:38:23] clip 200/1225 | VOD pos 1.45h | old: audio 12.27s video 0.36s | new: audio 1.00s video 0.42s | so far old 31m 11.2s vs new 4m 19.9s
+[2026-09-13 23:40:46] clip 210/1225 | VOD pos 1.49h | old: audio 12.80s video 0.30s | new: audio 1.02s video 0.40s | so far old 33m 20.7s vs new 4m 33.7s
+[2026-09-13 23:43:11] clip 220/1225 | VOD pos 1.53h | old: audio 12.41s video 0.33s | new: audio 1.03s video 0.41s | so far old 35m 31.5s vs new 4m 48.0s
+[2026-09-13 23:45:39] clip 230/1225 | VOD pos 1.57h | old: audio 13.05s video 0.31s | new: audio 0.97s video 0.34s | so far old 37m 45.8s vs new 5m 01.1s
+[2026-09-13 23:48:07] clip 240/1225 | VOD pos 1.62h | old: audio 13.89s video 0.31s | new: audio 0.96s video 0.36s | so far old 40m 01.0s vs new 5m 14.3s
+[2026-09-13 23:50:39] clip 250/1225 | VOD pos 1.66h | old: audio 14.26s video 0.32s | new: audio 0.95s video 0.35s | so far old 42m 19.8s vs new 5m 27.3s
+[2026-09-13 23:53:27] clip 260/1225 | VOD pos 1.70h | old: audio 14.97s video 0.36s | new: audio 1.00s video 0.39s | so far old 44m 53.0s vs new 5m 41.6s
+[2026-09-13 23:56:13] clip 270/1225 | VOD pos 1.74h | old: audio 14.79s video 0.30s | new: audio 0.96s video 0.36s | so far old 47m 25.4s vs new 5m 55.6s
+[2026-09-13 23:58:57] clip 280/1225 | VOD pos 1.78h | old: audio 15.57s video 0.34s | new: audio 1.02s video 0.37s | so far old 49m 55.6s vs new 6m 08.9s
+[2026-09-14 00:01:44] clip 290/1225 | VOD pos 1.82h | old: audio 15.33s video 0.34s | new: audio 1.00s video 0.44s | so far old 52m 29.7s vs new 6m 22.7s
+[2026-09-14 00:04:34] clip 300/1225 | VOD pos 1.87h | old: audio 15.72s video 0.30s | new: audio 0.94s video 0.34s | so far old 55m 06.2s vs new 6m 35.9s
+[2026-09-14 00:07:29] clip 310/1225 | VOD pos 1.91h | old: audio 16.17s video 0.36s | new: audio 0.98s video 0.35s | so far old 57m 47.1s vs new 6m 49.5s
+[2026-09-14 00:10:27] clip 320/1225 | VOD pos 1.95h | old: audio 16.36s video 0.35s | new: audio 1.00s video 0.37s | so far old 1h 00m 31.8s vs new 7m 03.1s
+[2026-09-14 00:13:30] clip 330/1225 | VOD pos 2.00h | old: audio 15.77s video 0.34s | new: audio 0.99s video 0.33s | so far old 1h 03m 21.7s vs new 7m 16.6s
+[2026-09-14 00:16:31] clip 340/1225 | VOD pos 2.04h | old: audio 16.73s video 0.33s | new: audio 0.96s video 0.33s | so far old 1h 06m 09.3s vs new 7m 30.0s
+[2026-09-14 00:19:36] clip 350/1225 | VOD pos 2.08h | old: audio 17.02s video 0.35s | new: audio 0.97s video 0.33s | so far old 1h 09m 00.7s vs new 7m 43.4s
+[2026-09-14 00:22:42] clip 360/1225 | VOD pos 2.12h | old: audio 16.90s video 0.34s | new: audio 0.96s video 0.36s | so far old 1h 11m 53.4s vs new 7m 56.7s
+[2026-09-14 00:25:51] clip 370/1225 | VOD pos 2.17h | old: audio 17.18s video 0.36s | new: audio 0.95s video 0.36s | so far old 1h 14m 49.2s vs new 8m 10.0s
+[2026-09-14 00:29:05] clip 380/1225 | VOD pos 2.22h | old: audio 18.33s video 0.30s | new: audio 0.95s video 0.34s | so far old 1h 17m 49.0s vs new 8m 23.3s
+[2026-09-14 00:32:24] clip 390/1225 | VOD pos 2.28h | old: audio 18.78s video 0.34s | new: audio 0.98s video 0.33s | so far old 1h 20m 54.7s vs new 8m 36.7s
+[2026-09-14 00:36:08] clip 400/1225 | VOD pos 2.33h | old: audio 20.91s video 0.33s | new: audio 0.99s video 0.41s | so far old 1h 24m 24.6s vs new 8m 51.0s
+[2026-09-14 00:39:44] clip 410/1225 | VOD pos 2.37h | old: audio 19.83s video 0.32s | new: audio 0.94s video 0.35s | so far old 1h 27m 46.8s vs new 9m 04.7s
+[2026-09-14 00:43:27] clip 420/1225 | VOD pos 2.41h | old: audio 20.40s video 0.35s | new: audio 1.00s video 0.39s | so far old 1h 31m 16.1s vs new 9m 18.4s
+[2026-09-14 00:47:01] clip 430/1225 | VOD pos 2.46h | old: audio 19.06s video 0.31s | new: audio 0.96s video 0.40s | so far old 1h 34m 36.5s vs new 9m 31.7s
+[2026-09-14 00:50:37] clip 440/1225 | VOD pos 2.51h | old: audio 19.63s video 0.34s | new: audio 0.97s video 0.36s | so far old 1h 37m 59.4s vs new 9m 45.0s
+[2026-09-14 00:51:50] ■ process_clips [old + new, interleaved]: 1h 48m 59.2s (interrupted)
+[2026-09-14 00:51:50] ■ pipeline_total: 2h 09m 53.0s (interrupted)
+[2026-09-14 00:52:29] ▶ export_old_whole_folder
+[2026-09-14 00:53:57] ■ export_old_whole_folder: 1m 28.7s (ok)
+[2026-09-14 00:53:58] ▶ export_new_triplets_only
+[2026-09-14 00:54:11] ■ export_new_triplets_only: 13.28s (ok)

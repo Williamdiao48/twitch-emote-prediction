@@ -1,0 +1,18 @@
+{
+  "run_started": "2026-09-13T22:41:56",
+  "vod_id": "1594760722",
+  "python": "3.13.15",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+  "cpu_count": 8,
+  "ram_gb": 53.5,
+  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "opencv": "5.0.0",
+  "yt_dlp": "2026.08.19",
+  "config": {
+    "CLIP_DURATION": 15,
+    "MIN_EMOTES": 40,
+    "TARGET_RES": 256,
+    "CLIP_STRIDE": 1
+  },
+  "vod_file_gb": 1.889
+}

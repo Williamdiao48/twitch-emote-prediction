@@ -51,6 +51,9 @@ The project is structured as three sequential Google Colab notebooks:
 - Trains `EmoteFusionMLP` to predict emote distributions from joint embeddings
 - Evaluates on a held-out test set with KL-divergence loss, top-K accuracy, and qualitative inspection
 
+### Pipeline performance
+The current scraper replaced an earlier version of the pipeline. Benchmarked on the same 443 clips from one VOD, its clip processing is **10× faster** (1h 39m → 9m 49s), mainly from seeking directly to each clip's audio instead of decoding the VOD from the start every time. It also fixes video frames drifting away from their chat window. Full results, method and raw logs are in [`benchmarks/`](benchmarks/).
+
 ---
 
 ## Model Architecture

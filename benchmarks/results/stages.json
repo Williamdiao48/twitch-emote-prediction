@@ -1,0 +1,71 @@
+{
+  "vod_metadata": {
+    "channel_id": "490592527",
+    "vod_duration_s": 23883,
+    "vod_duration_h": 6.63,
+    "seconds": 1.684,
+    "human": "1.68s",
+    "status": "ok",
+    "started": "2026-09-13T22:41:57"
+  },
+  "download_chat [new method]": {
+    "requests": 2484,
+    "retries": 0,
+    "skipped_seconds": 0,
+    "resumed_from_s": null,
+    "stopped_early": null,
+    "messages": 135924,
+    "last_offset_s": 23882,
+    "coverage_pct": 100.0,
+    "seconds": 1018.099,
+    "human": "16m 58.1s",
+    "status": "ok",
+    "started": "2026-09-13T22:41:58"
+  },
+  "download_video [new method]": {
+    "file_gb": 1.889,
+    "seconds": 232.911,
+    "human": "3m 52.9s",
+    "status": "ok",
+    "started": "2026-09-13T22:58:56"
+  },
+  "analyze_chat": {
+    "comments": 135924,
+    "windows_with_chat": 1447,
+    "bttv_codes": 89,
+    "interesting_clips": 1225,
+    "unique_emotes": 3183,
+    "seconds": 1.088,
+    "human": "1.09s",
+    "status": "ok",
+    "started": "2026-09-13T23:02:49"
+  },
+  "process_clips [old + new, interleaved]": {
+    "source_fps": 30.221333534497543,
+    "source_resolution": "640x360",
+    "seconds": 6539.186,
+    "human": "1h 48m 59.2s",
+    "status": "interrupted",
+    "started": "2026-09-13T23:02:50"
+  },
+  "pipeline_total": {
+    "seconds": 7793.049,
+    "human": "2h 09m 53.0s",
+    "status": "interrupted",
+    "started": "2026-09-13T22:41:57"
+  },
+  "export_old_whole_folder": {
+    "archive_gb": 2.14,
+    "seconds": 88.743,
+    "human": "1m 28.7s",
+    "status": "ok",
+    "started": "2026-09-14T00:52:29"
+  },
+  "export_new_triplets_only": {
+    "archive_gb": 0.298,
+    "seconds": 13.285,
+    "human": "13.28s",
+    "status": "ok",
+    "started": "2026-09-14T00:53:58"
+  }
+}

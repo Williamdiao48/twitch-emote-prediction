@@ -1,0 +1,98 @@
+{
+  "head_to_head": {
+    "clips_measured": 443,
+    "clip_stride": 1,
+    "vod_span_h": [
+      0.61,
+      2.53
+    ],
+    "first_decile_mean_pos_h": 0.7,
+    "last_decile_mean_pos_h": 2.42,
+    "old": {
+      "measured_totals_s": {
+        "target_s": 2.11,
+        "video_s": 150.13,
+        "audio_s": 5789.87,
+        "total_s": 5942.11
+      },
+      "mean_per_clip_s": {
+        "target_s": 0.005,
+        "video_s": 0.339,
+        "audio_s": 13.07,
+        "total_s": 13.413
+      },
+      "audio_share_pct": 97.4,
+      "audio_growth_s_per_vod_hour": 7.867,
+      "audio_growth_r2": 0.982,
+      "first_decile_per_clip_s": {
+        "total": 6.779,
+        "audio": 6.443
+      },
+      "last_decile_per_clip_s": {
+        "total": 20.426,
+        "audio": 20.067
+      },
+      "video_window_offset_median_s": 2288.79,
+      "clip_stage_at_stride_1_s": 5942.1
+    },
+    "new": {
+      "measured_totals_s": {
+        "target_s": 1.7,
+        "video_s": 159.81,
+        "audio_s": 427.52,
+        "total_s": 589.03
+      },
+      "mean_per_clip_s": {
+        "target_s": 0.004,
+        "video_s": 0.361,
+        "audio_s": 0.965,
+        "total_s": 1.33
+      },
+      "audio_share_pct": 72.6,
+      "audio_growth_s_per_vod_hour": 0.032,
+      "audio_growth_r2": 0.1513,
+      "first_decile_per_clip_s": {
+        "total": 1.283,
+        "audio": 0.933
+      },
+      "last_decile_per_clip_s": {
+        "total": 1.351,
+        "audio": 0.979
+      },
+      "video_window_offset_median_s": 0.04,
+      "clip_stage_at_stride_1_s": 589.0
+    },
+    "speedup_x": {
+      "target_s": 1.24,
+      "video_s": 0.94,
+      "audio_s": 13.54,
+      "total_s": 10.09
+    },
+    "audio_speedup_last_decile_x": 20.5,
+    "old_implied_decode_speed_x_realtime": 457.6
+  },
+  "headlines": [
+    "Clip processing on 443 identical clips: 1h 39m 02.1s old \u2192 9m 49.0s new (10.09\u00d7 faster).",
+    "Audio extraction: 1h 36m 29.9s \u2192 7m 07.5s (13.54\u00d7 faster); it was 97.4% of the old pipeline's clip time.",
+    "Old per-clip time grew from 6.8s (\u22480.7h into the VOD) to 20.4s (\u22482.42h); new stayed at 1.28s \u2192 1.35s.",
+    "Late in the VOD, audio per clip was 20.1s old vs 0.98s new (20.5\u00d7 faster).",
+    "Old video frames came a median 2288.79s from the intended window; new: 0.04s.",
+    "Export archive: 2.14 GB \u2192 0.298 GB (7.2\u00d7 smaller, 6.7\u00d7 faster to zip)."
+  ],
+  "caveats": [
+    "Both methods share the new downloader (yt-dlp + GQL); TwitchDownloaderCLI itself is not measured.",
+    "Both methods process the old parser's clip list, so clip counts match the old pipeline, not the new one.",
+    "Old and new video times are similar, but the old step never seeks, so its frames come from the wrong part of the VOD.",
+    "Clips are interleaved with alternating order so neither method always gets a warmer disk cache.",
+    "Single run on 8 CPUs; Colab hardware varies between sessions."
+  ],
+  "export": {
+    "old_archive_gb": 2.14,
+    "old_zip_s": 88.743,
+    "new_archive_gb": 0.298,
+    "new_zip_s": 13.285,
+    "size_reduction_x": 7.2,
+    "zip_speedup_x": 6.7,
+    "note": "Old export also required a browser download of old_archive_gb; not timed."
+  }
+}
