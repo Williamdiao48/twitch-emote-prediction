@@ -122,17 +122,19 @@ Clips are only included if their window contains at least 5 emote occurrences, f
 
 Evaluated on 852 held-out test clips:
 
-| Metric | Value |
-|---|---|
-| Average KL loss | 1.3022 |
-| Top-1 in top-5 accuracy | 64.2% |
-| Top-5 overlap (avg) | 2.29 / 5 (45.8%) |
+| Metric | Model | Frequency prior | Uniform random |
+|---|---|---|---|
+| Average KL loss | **1.3022** | 1.7321 | — |
+| Top-1 in top-5 accuracy | **64.2%** | 47.3% | 10.0% |
+| Top-5 overlap (avg) | **2.29 / 5** (45.8%) | 1.63 / 5 (32.6%) | 0.50 / 5 (10.0%) |
 
 **Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 64.2% of the time.
 
 **Top-5 overlap**: on average, 2.29 of the model's top-5 predicted emotes overlap with the actual top-5 emotes in chat — 45.8% overlap on a 5-class ranking task with a vocabulary of 50.
 
-**Evaluation caveat.** The held-out set drives early stopping and checkpoint selection as well as final reporting, so it functions as a validation set and the figures above are mildly optimistic. The 80/20 split is also random over clips, and clips are consecutive 15-second windows from the same broadcasts — so a test clip's neighbours frequently appear in training. A grouped split (holding out whole VODs) would be the stricter evaluation, and would likely score lower.
+**Baselines.** Twitch chat is top-heavy — a single emote (`vlrntCurse`) accounts for 12.2% of all emote mass in these broadcasts — so a predictor that ignores the clip entirely still scores well. The *frequency prior* ranks emotes by their total mass in the training clips and predicts that same ranking for every test clip; the *uniform random* column is the closed-form expectation of picking emotes at random from the 50-emote vocabulary. The model beats the prior on all three metrics (+16.9 points top-1 in top-5, +0.66 top-5 overlap, 0.43 lower KL), which is the comparison that matters: roughly half the headline accuracy is available without looking at the video or audio at all. Both baselines are computed in the Baselines cell of `train.ipynb`, on the same test split.
+
+**Evaluation caveat.** The held-out set drives early stopping and checkpoint selection as well as final reporting, so it functions as a validation set and the figures above are mildly optimistic. The 80/20 split is also random over clips, and clips are consecutive 15-second windows from the same broadcasts — so a test clip's neighbours frequently appear in training. A grouped split (holding out whole VODs) would be the stricter evaluation, and would likely score lower. The baselines above received no such tuning, so the gap between the model and the frequency prior is, if anything, slightly flattered.
 
 ![Top-5 Emote Overlap Distribution](assets/top5_emote_overlap_distribution.png)
 
