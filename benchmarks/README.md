@@ -44,9 +44,11 @@ With `-ss` after `-i`, FFmpeg decodes the file from the start and discards every
 
 ### Video frames: seeking to each clip's start
 
-The original loop computed `start_pos = int(start_time * original_fps)` but never passed it to the capture, so frames were read sequentially from wherever the previous clip stopped. Each clip therefore took its frames from earlier in the VOD than its chat window. By the end of this run, the frames read were a median **38 minutes (2,289 s)** from their intended window. The current version calls `cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)` first, and its frames were a median 0.04 s from the window.
+The original loop computed `start_pos = int(start_time * original_fps)` but never passed it to the capture. One `cv2.VideoCapture` was opened before the loop and read sequentially, so clip *N* got the *N*-th consecutive block of the VOD instead of the window at `start_time`.
 
-Video processing time is about the same for both, so this was a correctness fix rather than a speedup: chat labels are now paired with the footage they reacted to.
+The chat target and the audio were both taken from the right place — the target from the `start_time` chat bucket, the audio from FFmpeg's `-ss start_time`. Only the video was wrong, which left it misaligned with both. In this run the first clip's window began 2,190 s into the VOD while its frames came from 0 s, and the gap widened to 2,582 s by clip 443 (median **2,289 s**, about 38 minutes) because the sequential reader walks through every second of the VOD while the clip list skips the quiet stretches between windows. The current version calls `cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)` first, and its frames were a median 0.04 s from the window.
+
+Video processing time is about the same for both, so this was a correctness fix rather than a speedup: each clip's footage now matches the audio and chat recorded alongside it.
 
 ### Export
 

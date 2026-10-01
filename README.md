@@ -49,10 +49,10 @@ The project is structured as three sequential Google Colab notebooks:
 - Loads joint embeddings and emote targets across all processed VODs
 - Builds a global emote vocabulary (top-50 emotes by frequency across the corpus)
 - Trains `EmoteFusionMLP` to predict emote distributions from joint embeddings
-- Evaluates on a held-out test set with KL-divergence loss, top-K accuracy, and qualitative inspection
+- Evaluates on a held-out test set against a frequency-prior baseline, using distribution overlap, KL-divergence loss, top-K accuracy, and qualitative inspection
 
 ### Pipeline performance
-The current scraper replaced an earlier version of the pipeline. Benchmarked on the same 443 clips from one VOD, its clip processing is **10× faster** (1h 39m → 9m 49s), mainly from seeking directly to each clip's audio instead of decoding the VOD from the start every time. It also fixes video frames drifting away from their chat window. Full results, method and raw logs are in [`benchmarks/`](benchmarks/).
+The current scraper replaced an earlier version of the pipeline. Benchmarked on the same 443 clips from one VOD, its clip processing is **10× faster** (1h 39m → 9m 49s), mainly from seeking directly to each clip's audio instead of decoding the VOD from the start every time. It also fixes a sync bug: the old loop never seeked the video capture, so a clip's frames came from the wrong point in the VOD and matched neither its own audio nor its chat labels. Full results, method and raw logs are in [`benchmarks/`](benchmarks/).
 
 ---
 
@@ -120,19 +120,27 @@ Clips are only included if their window contains at least 5 emote occurrences, f
 
 ## Results
 
-Evaluated on 852 held-out test clips:
+Evaluated on 852 held-out test clips (80/20 split, `SPLIT_SEED = 42`):
 
 | Metric | Model | Frequency prior | Uniform random |
 |---|---|---|---|
-| Average KL loss | **1.3022** | 1.7321 | — |
-| Top-1 in top-5 accuracy | **64.2%** | 47.3% | 10.0% |
-| Top-5 overlap (avg) | **2.29 / 5** (45.8%) | 1.63 / 5 (32.6%) | 0.50 / 5 (10.0%) |
+| Distribution overlap | **41.8%** | 26.8% | 15.8% |
+| Average KL loss | **1.3092** | 1.7516 | — |
+| Top-1 exact match | **32.2%** | 16.4% | 2.0% |
+| Top-1 in top-5 accuracy | **67.0%** | 45.5% | 10.0% |
+| Top-5 overlap (avg) | **2.29 / 5** (45.8%) | 1.67 / 5 (33.4%) | 0.50 / 5 (10.0%) |
 
-**Top-1 in top-5 accuracy**: the model's single most confident prediction appears in the ground-truth top-5 emotes 64.2% of the time.
+**Distribution overlap** is the primary measure: `sum(min(predicted, actual))` across all 50 emotes, equivalently `1 − total variation distance`. It reads as the share of chat's emote mix the model placed correctly. Unlike the ranking metrics it needs no cutoff and no `argmax`, so it evaluates the model on what it actually produces — a full probability distribution over the vocabulary.
 
-**Top-5 overlap**: on average, 2.29 of the model's top-5 predicted emotes overlap with the actual top-5 emotes in chat — 45.8% overlap on a 5-class ranking task with a vocabulary of 50.
+**Average KL loss** is the training objective. Rigorous for distributions but unbounded, so it is hard to read in absolute terms; it is most useful as a relative comparison between rows.
 
-**Baselines.** Twitch chat is top-heavy — a single emote (`vlrntCurse`) accounts for 12.2% of all emote mass in these broadcasts — so a predictor that ignores the clip entirely still scores well. The *frequency prior* ranks emotes by their total mass in the training clips and predicts that same ranking for every test clip; the *uniform random* column is the closed-form expectation of picking emotes at random from the 50-emote vocabulary. The model beats the prior on all three metrics (+16.9 points top-1 in top-5, +0.66 top-5 overlap, 0.43 lower KL), which is the comparison that matters: roughly half the headline accuracy is available without looking at the video or audio at all. Both baselines are computed in the Baselines cell of `train.ipynb`, on the same test split.
+**Top-1 exact match**: the model's most confident emote is the one chat actually used most.
+
+**Top-1 in top-5** and **Top-5 overlap** are precision@1 and precision@5 against a 5-emote relevance set — chat's five most-used emotes for that clip. Both are easy to read, but both binarize a continuous distribution into a relevance set and discard everything below the cutoff, so they answer a narrower question than the model was trained on. They are reported for legibility, not as the primary measure.
+
+**Baselines.** Twitch chat is top-heavy, so a predictor that ignores the clip entirely still scores well: the *frequency prior* ranks emotes by their total mass in the training clips and predicts that same ranking for every test clip, and it still places 26.8% of chat's emote mix correctly and names the top emote 16.4% of the time. The *uniform random* column is the expectation of spreading mass evenly across the 50-emote vocabulary. The model beats the prior on every metric (+15.0 pts distribution overlap, 0.4424 lower KL, +15.8 pts top-1 exact, +21.5 pts top-1-in-top-5, +0.62 top-5 overlap), which is the comparison that matters — a good fraction of the headline numbers is available without looking at the video or audio at all. Both baselines are computed in the Baselines cell of `train.ipynb`, on the same test split.
+
+**Run-to-run spread.** An earlier evaluation of this architecture, before `SPLIT_SEED` was added, drew a different random 852-clip test set and scored 64.2% top-1-in-top-5 at KL 1.3022 — with top-5 overlap landing on the same 2.29 / 5. Treat the ranking metrics as carrying roughly ±3 points of split noise and do not read the decimal place as meaningful.
 
 **Evaluation caveat.** The held-out set drives early stopping and checkpoint selection as well as final reporting, so it functions as a validation set and the figures above are mildly optimistic. The 80/20 split is also random over clips, and clips are consecutive 15-second windows from the same broadcasts — so a test clip's neighbours frequently appear in training. A grouped split (holding out whole VODs) would be the stricter evaluation, and would likely score lower. The baselines above received no such tuning, so the gap between the model and the frequency prior is, if anything, slightly flattered.
 
