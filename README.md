@@ -75,15 +75,15 @@ Audio [125, 768] ─► Audio Tower  ──┘               │
                                           Log-Softmax (50-dim)
 ```
 
-**Visual Tower** and **Audio Tower** each independently compress their input modality through a 3-stage bottleneck (LayerNorm → Linear → GELU, repeated) down to 128-dim, with dropout for regularization.
+**Visual Tower** and **Audio Tower** are applied token-wise. Each normalizes its input once with LayerNorm, then compresses it through three Linear → GELU stages (input → 256 → 128 → 128), with dropout after the first.
 
 **CrossAttentionBottleneck** performs bidirectional cross-modal attention: the visual representation queries audio ("what audio events are consistent with this scene?") and the audio representation queries video ("what visual events match this audio spike?"). Residual connections and LayerNorm are applied after each attention operation. The attended sequences are then mean-pooled over their sequence dimension, giving one vector per modality.
 
-The fused representation is concatenated with a learned **per-channel embedding** (64-dim) that encodes which Twitch channel the clip is from. Different Twitch communities develop distinct emote vocabularies and react to the same events differently — a clutch play on a VCT broadcast elicits different emotes than the same play on a smaller streamer's channel. The channel embedding gives the model a way to condition its predictions on those community-specific norms rather than averaging over them.
+The fused representation is concatenated with a learned **per-channel embedding** (64-dim) that encodes which Twitch channel the clip is from. Different Twitch communities develop distinct emote vocabularies and react to the same events differently — a clutch play on a VCT broadcast elicits different emotes than the same play on a smaller streamer's channel. The channel embedding gives the model a way to condition its predictions on those community-specific norms rather than averaging over them. The reported model is trained on a single channel, so there the embedding is one learned vector, equivalent to a bias; it only carries information when several channels are trained together.
 
 A **fusion projection** compresses the concatenated 320-dim vector (128 visual + 128 audio + 64 channel) down to a 64-dim trunk. Two **ResidualBlock** layers (LayerNorm → Linear → GELU → Dropout → Linear → Dropout, with skip connection) then process it before the final head.
 
-**Per-class temperature scaling** (a learned scalar per output class) sharpens or softens predictions independently for each emote, allowing the model to express calibrated uncertainty.
+**Per-class temperature scaling** (a learned scalar per output class, clamped to [0.5, 3.0]) sharpens or softens predictions independently for each emote. It is trained jointly with the rest of the model rather than fitted afterwards, so it is not a calibration step; in the reported runs the learned temperatures end between about 0.87 and 1.11.
 
 ### Training Details
 
@@ -94,7 +94,7 @@ A **fusion projection** compresses the concatenated 320-dim vector (128 visual +
 | LR Schedule | Linear warmup (5 epochs) → cosine annealing |
 | Mixup | α=0.5 (epochs 0–19) → 0.2 (20–34) → 0.0 (35+) |
 | Early stopping | Patience = 20 epochs |
-| Label smoothing | 0.025 (per-channel, applied to valid emotes only) |
+| Label smoothing | 0.025, spread over the emotes present in that VOD's vocabulary |
 | Feature noise | Gaussian noise σ=0.02 injected during training |
 | Dropout | 0.7 (fusion trunk), 0.2 (towers), 0.1 (input features) |
 | Batch size | 64 |
@@ -108,7 +108,7 @@ A **fusion projection** compresses the concatenated 320-dim vector (128 visual +
 ## Dataset
 
 - **Source**: 12 Twitch VODs across 4 Valorant channels (Riot Games Valorant, FNS, VCT Americas, VCT EMEA), scraped into 8,000+ labelled clips
-- **Trained on**: the 3 VCT (Valorant Champions Tour) VODs from the official Riot Games Valorant channel — 4,000+ clips. Mixing channels degraded accuracy, so the reported run is single-channel (see [Limitations](#limitations--future-work))
+- **Trained on**: the 3 VCT (Valorant Champions Tour) VODs from the official Riot Games Valorant channel — 4,257 clips after filtering (3,405 train / 852 test). Mixing channels degraded accuracy, so the reported run is single-channel (see [Limitations](#limitations--future-work))
 - **Clip length**: 15 seconds, 64 frames at 256×256 (center-cropped)
 - **Target**: Normalized emote-frequency vector over a global vocabulary of 50 emotes
 - **Emote sources**: Twitch native + BTTV + FFZ + 7TV
@@ -120,15 +120,15 @@ Clips are only included if their window contains at least 5 emote occurrences, f
 
 ## Results
 
-Evaluated on 852 held-out test clips (80/20 split, `SPLIT_SEED = 42`):
+Mean ± standard deviation over 5 training runs, each on a different random 80/20 split (`SPLIT_SEED` = 42, 0, 1, 2, 3) and scored on its own 852 held-out clips. The baselines are recomputed on each run's split.
 
 | Metric | Model | Frequency prior | Uniform random |
 |---|---|---|---|
-| Distribution overlap | **41.8%** | 26.8% | 15.8% |
-| Average KL loss | **1.3092** | 1.7516 | — |
-| Top-1 exact match | **32.2%** | 16.4% | 2.0% |
-| Top-1 in top-5 accuracy | **67.0%** | 45.5% | 10.0% |
-| Top-5 overlap (avg) | **2.29 / 5** (45.8%) | 1.67 / 5 (33.4%) | 0.50 / 5 (10.0%) |
+| Distribution overlap | **41.0% ± 0.5** | 27.1% ± 0.2 | 16.0% |
+| Average KL loss | **1.30 ± 0.02** | 1.74 ± 0.01 | — |
+| Top-1 exact match | **29.3% ± 0.8** | 16.8% ± 0.3 | 2.0% |
+| Top-1 in top-5 accuracy | **66.4% ± 1.2** | 46.9% ± 1.2 | 10.0% |
+| Top-5 overlap (avg) | **2.32 / 5** ± 0.03 | 1.63 / 5 ± 0.03 | 0.50 / 5 |
 
 **Distribution overlap** is the primary measure: `sum(min(predicted, actual))` across all 50 emotes, equivalently `1 − total variation distance`. It reads as the share of chat's emote mix the model placed correctly. Unlike the ranking metrics it needs no cutoff and no `argmax`, so it evaluates the model on what it actually produces — a full probability distribution over the vocabulary.
 
@@ -138,9 +138,9 @@ Evaluated on 852 held-out test clips (80/20 split, `SPLIT_SEED = 42`):
 
 **Top-1 in top-5** and **Top-5 overlap** are precision@1 and precision@5 against a 5-emote relevance set — chat's five most-used emotes for that clip. Both are easy to read, but both binarize a continuous distribution into a relevance set and discard everything below the cutoff, so they answer a narrower question than the model was trained on. They are reported for legibility, not as the primary measure.
 
-**Baselines.** Twitch chat is top-heavy, so a predictor that ignores the clip entirely still scores well: the *frequency prior* ranks emotes by their total mass in the training clips and predicts that same ranking for every test clip, and it still places 26.8% of chat's emote mix correctly and names the top emote 16.4% of the time. The *uniform random* column is the expectation of spreading mass evenly across the 50-emote vocabulary. The model beats the prior on every metric (+15.0 pts distribution overlap, 0.4424 lower KL, +15.8 pts top-1 exact, +21.5 pts top-1-in-top-5, +0.62 top-5 overlap), which is the comparison that matters — a good fraction of the headline numbers is available without looking at the video or audio at all. Both baselines are computed in the Baselines cell of `train.ipynb`, on the same test split.
+**Baselines.** Twitch chat is top-heavy, so a predictor that ignores the clip entirely still scores well: the *frequency prior* ranks emotes by their total mass in the training clips and predicts that same ranking for every test clip, and it still places 27.1% of chat's emote mix correctly and names the top emote 16.8% of the time. The *uniform random* column is the expectation of spreading mass evenly across the 50-emote vocabulary. The model beats the prior on every metric in every run (on average +13.9 pts distribution overlap, 0.44 lower KL, +12.5 pts top-1 exact, +19.4 pts top-1-in-top-5, +0.69 top-5 overlap), which is the comparison that matters — a good fraction of the headline numbers is available without looking at the video or audio at all. Both baselines are computed in the Baselines cell of `train.ipynb`, on the same test split as the model.
 
-**Run-to-run spread.** An earlier evaluation of this architecture, before `SPLIT_SEED` was added, drew a different random 852-clip test set and scored 64.2% top-1-in-top-5 at KL 1.3022 — with top-5 overlap landing on the same 2.29 / 5. Treat the ranking metrics as carrying roughly ±3 points of split noise and do not read the decimal place as meaningful.
+**Run-to-run spread.** Across the five runs, distribution overlap stays within 40.1–41.4% and its gap over the prior within 13.2–14.3 points; the ranking metrics move more (top-1-in-top-5 64.4–67.6%). The charts below are from the `SPLIT_SEED = 42` run (best epoch 25 of 45; 41.1% overlap, 66.8% top-1-in-top-5).
 
 **Evaluation caveat.** The held-out set drives early stopping and checkpoint selection as well as final reporting, so it functions as a validation set and the figures above are mildly optimistic. The 80/20 split is also random over clips, and clips are consecutive 15-second windows from the same broadcasts — so a test clip's neighbours frequently appear in training. A grouped split (holding out whole VODs) would be the stricter evaluation, and would likely score lower. The baselines above received no such tuning, so the gap between the model and the frequency prior is, if anything, slightly flattered.
 
@@ -194,7 +194,7 @@ This is a research and educational project.
 
 ## Limitations & Future Work
 
-**Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. In practice, with ~4,000 training clips the attention weights tend to collapse toward uniform across tokens, making the mechanism roughly equivalent to mean pooling. The architecture is sound but data-limited: sequence-level cross-attention needs appreciably more examples to learn meaningful temporal correspondences. More training clips is the primary path to improving the model — though see below on *which* clips.
+**Dataset scale.** The `CrossAttentionBottleneck` operates over full token sequences — 32 temporal video tokens and 125 audio tokens — allowing each modality to attend to specific moments in the other. With ~3,400 training clips, sequence-level cross-attention has little data to learn temporal correspondences from, and it did not outperform an earlier version that attended over single pooled vectors. Whether the attention weights are doing more than averaging has not been measured — logging their entropy is the direct check. More training clips is the primary path to improving the model — though see below on *which* clips.
 
 **Cross-channel generalization.** The scraped corpus spans four channels; the reported model trains on one. Including the other channels' clips degraded accuracy enough that the corpus was restricted to the Riot Games Valorant channel. The per-channel embedding was designed for exactly this case — conditioning predictions on community-specific emote vocabularies — and at this scale it was not sufficient to absorb the shift between a tournament broadcast's chat and an individual streamer's. Whether that is a data-volume limit or an architectural one is untested: more clips *per channel*, rather than more channels, is the experiment to run.
 
